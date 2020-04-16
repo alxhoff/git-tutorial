@@ -42,9 +42,8 @@
 #define FIRST_STATE_NAME "Count up once"
 #define SECOND_STATE_NAME "Count up twice"
 #define THIRD_STATE_NAME "Count down once"
-
-#define NANOS_IN_SEC 100000000
-#define NANOS_IN_MSEC 1000000
+#define NANOS_IN_SEC 1000000
+#define NANOS_IN_MSEC 10000
 #define MSEC_IN_NANO(MSEC) MSEC *NANOS_IN_MSEC
 
 #define DEFAULT_TICK 100
