@@ -1,0 +1,3 @@
+/home/michael/git-tutorial/build/CMakeFiles/foo.dir
+/home/michael/git-tutorial/build/CMakeFiles/edit_cache.dir
+/home/michael/git-tutorial/build/CMakeFiles/rebuild_cache.dir
