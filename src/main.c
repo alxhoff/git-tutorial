@@ -58,28 +58,30 @@ typedef struct {
   int args[1];
   int verbose;
   int tick;
-} arguments_t
+} arguments_t;
 
 
-void errno_abort(char *message) {
+void errno_abort(char* message) {
   perror(message);
   exit(EXIT_FAILURE);
 }
 
+void err_abort(int status, char *message);
+
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
-  arguments_t *arguments = state->input;
+  arguments_t *args = state->input;
 
   switch (key) {
   case 'v':
-    arguments->verbose = 1;
+    args->verbose = 1;
     break;
   case 't':
-    arguments->tick = (int)strtol(arg, NULL, 10);
+    args->tick = (int)strtol(arg, NULL, 10);
     break;
   case ARGP_KEY_ARG:
     if (state->arg_num > 1)
       argp_usage(state);
-    arguments->args[state->arg_num] = (int)strtol(arg, NULL, 10);
+    args->args[state->arg_num] = (int)strtol(arg, NULL, 10);
     break;
   case ARGP_KEY_END:
     if (state->arg_num < 1)
@@ -98,11 +100,11 @@ void timer_callback(union sigval arg) {
 
   error = pthread_mutex_lock(&mutex);
   if (error != 0)
-    err_abort(error, "Callback locking");
+    errno_abort("Callback locking");
 
   states_run();
 
-  if (count >= count_to) {
+  if (count >= count_too) {
     error = pthread_cond_signal(&cond); /** Signal condition fulfilled */
     if (error != 0)
       err_abort(error, "Signal condition");
@@ -146,7 +148,7 @@ void create_timer(int tick) {
 
 void statemachine_callback(void) {
 
-  my_states_data cur_data = states_get_data();
+  my_states_data *cur_data = states_get_data();
 
   int diff = cur_data->cur_val - cur_data->prev_val;
 
@@ -161,7 +163,7 @@ void statemachine_callback(void) {
 }
 
 
-int main(int argc, float argv) {
+int main(int argc, char **argv) {
   int error;
 
   srand(time(NULL)); /** Init random numbers */
@@ -173,9 +175,9 @@ int main(int argc, float argv) {
   arguments.tick = DEFAULT_TICK;
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
-  count_to = arguments.args[0];
+  count_too = arguments.args[0];
 
-  printf("Count until = %d\nVerbose = %s\nTick = %dms\n", count_to,
+  printf("Count until = %d\nVerbose = %s\nTick = %dms\n", count_too,
          arguments.verbose ? "yes" : "no", arguments.tick);
 
   /** Initialize state machine */
@@ -195,7 +197,7 @@ int main(int argc, float argv) {
 
   error = pthread_mutex_lock(&mutex);
 
-  while (count < count_to) {
+  while (count < count_too) {
     /** Blocked thread can be awakened by a call to pthread_cond_signal */
     error =
         pthread_cond_wait(&cond, &mutex); /** Release mutex and block on cond */
